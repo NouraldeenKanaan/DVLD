@@ -1,0 +1,30 @@
+
+# Ignore build and system files
+
+# Build results
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Debug files
+*.pdb
+*.dbmdl
+
+# Rider / VS Code / ReSharper
+.idea/
+.vscode/
+
+# Logs and temp
+*.log
+*.cache
+*.tmp
+
+# Backup and system files
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
