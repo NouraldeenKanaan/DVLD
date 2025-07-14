@@ -1,37 +1,13 @@
-# DVLD System
+# DVLD - Driver and Vehicle Licensing Department System
 
 ## Overview
-The **DVLD System** is a C# .NET application for managing driver and vehicle licensing. It uses a layered architecture with three projects:
-- **DVLD_Presentation**: User interface (Windows Forms/WPF).
-- **DVLD_Business**: Business logic and rules.
-- **DVLD_DataAccess**: Database operations (ADO.NET/Entity Framework).
 
-## Features
-- Manage driver licenses and vehicle registrations.
-- Scalable, modular design.
-- User-friendly interface.
+Driving & Vehicle License Department Application. DVLD is a Desktop Application developed from scratch, using **.NET Framework Windows Forms**, **ADO.NET**, and **Microsoft SQL Server** as part of Programming Advices Course 19. It manages driver and vehicle licensing processes, including user authentication, person records, test types, test appointments, licenses, and local driving license applications.
 
-## Prerequisites
-- Visual Studio 2022+
-- .NET Framework (e.g., 4.8)
-- SQL Server (optional, for database)
+## Project Structure
 
-## Setup
-1. Clone the repo: `git clone https://github.com/yourusername/DVLD.git`
-2. Open `DVLD.sln` in Visual Studio.
-3. Restore NuGet packages: `dotnet restore`
-4. Configure database connection in `DVLD_DataAccess` (e.g., `app.config`).
-5. Build and run (`F5`), with `DVLD_Presentation` as the startup project.
+The solution is organized into three projects:
 
-## Usage
-- Launch the app via `DVLD_Presentation`.
-- Use the UI to issue/renew licenses, manage vehicles, or view data.
-
-## Contributing
-1. Fork and create a branch: `git checkout -b feature/your-feature`
-2. Commit changes: `git commit -m "Your changes"`
-3. Push: `git push origin feature/your-feature`
-4. Submit a pull request.
-
-## License
-[MIT License](LICENSE)
+- **DVLD**: Contains the user interface, implemented using Windows Forms for interacting with the application.
+- **DVLD_Business**: Implements the business logic, serving as an intermediary between the presentation and data access layers.
+- **DVLD_DataAccess**: Manages database operations using ADO.NET, with classes for handling users, people, tests, test appointments, and licenses.
