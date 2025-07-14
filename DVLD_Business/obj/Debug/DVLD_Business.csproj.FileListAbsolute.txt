@@ -1,9 +1,0 @@
-E:\DVLD_Business\bin\Debug\DVLD_Business.dll
-E:\DVLD_Business\bin\Debug\DVLD_Business.pdb
-E:\DVLD_Business\bin\Debug\DVLD_DataAccess.dll
-E:\DVLD_Business\bin\Debug\DVLD_DataAccess.pdb
-E:\DVLD_Business\obj\Debug\DVLD_Business.csproj.AssemblyReference.cache
-E:\DVLD_Business\obj\Debug\DVLD_Business.csproj.CoreCompileInputs.cache
-E:\DVLD_Business\obj\Debug\DVLD_Bus.1422E61B.Up2Date
-E:\DVLD_Business\obj\Debug\DVLD_Business.dll
-E:\DVLD_Business\obj\Debug\DVLD_Business.pdb
