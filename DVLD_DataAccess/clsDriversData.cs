@@ -10,34 +10,31 @@ namespace DVLD_DataAccess
         {
             DataTable dtDrivers = new DataTable();
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    connection.Open();
 
-            string query = @"SELECT Drivers.DriverID, Drivers.PersonID, People.NationalNumber,
+                    string query = @"SELECT Drivers.DriverID, Drivers.PersonID, People.NationalNumber,
 People.FirstName + ' ' + People.SecondName + ' ' + ISNULL(People.ThirdName,'') + ' ' + People.LastName as FullName,Drivers.CreatedDate,
 (select COUNT(Licenses.LicenseID) from Licenses WHERE Licenses.DriverID = Drivers.DriverID) as ActiveLicenses
 FROM Drivers INNER JOIN People ON Drivers.PersonID = People.PersonID";
 
-            SqlCommand command = new SqlCommand(query, connection);
-
-            try
-            {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.HasRows)
-                    dtDrivers.Load(reader);
-
-                reader.Close();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                dtDrivers.Load(reader);
+                        }
+                    }
+                }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return null;
-            }
-            finally
-            {
-                connection.Close();
-            }
+                throw e;
+            }     
 
             return dtDrivers;
         }
@@ -45,38 +42,38 @@ FROM Drivers INNER JOIN People ON Drivers.PersonID = People.PersonID";
         {
             int NewDriverID = -1;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"INSERT INTO [dbo].[Drivers]
-           ([PersonID]
-           ,[CreatedByUserID]
-           ,[CreatedDate])
-           VALUES
-                (@PersonID,@CreatedByUserID,@CreatedDate);
-            Select Scope_Identity();";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            command.Parameters.AddWithValue("@PersonID", PersonID);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
-            command.Parameters.AddWithValue("@CreatedDate", CreatedDate);
-
             try
             {
-                connection.Open();
-
-                object result = command.ExecuteScalar();
-
-                if (result != null && int.TryParse(result.ToString(), out int InsertedID))
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    NewDriverID = InsertedID;
-                }
+                    connection.Open();
 
-                connection.Close();
+                    string query = @"INSERT INTO [dbo].[Drivers]
+                                                       ([PersonID]
+                                                       ,[CreatedByUserID]
+                                                       ,[CreatedDate])
+                                                       VALUES
+                                                            (@PersonID,@CreatedByUserID,@CreatedDate);
+                                                        Select Scope_Identity();";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@PersonID", PersonID);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        command.Parameters.AddWithValue("@CreatedDate", CreatedDate);
+
+                        object result = command.ExecuteScalar();
+
+                        if (result != null && int.TryParse(result.ToString(), out int InsertedID))
+                        {
+                            NewDriverID = InsertedID;
+                        }
+                    }
+                }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return -1;
+                throw e;
             }
 
             return NewDriverID;
@@ -85,76 +82,73 @@ FROM Drivers INNER JOIN People ON Drivers.PersonID = People.PersonID";
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"Select * from Drivers WHERE DriverID = @DriverID";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if(reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    connection.Open();
 
-                    PersonID = (int)reader["PersonID"];
-                    CreatedByUserID = (int)reader["CreatedByUserID"];
-                    CreatedDate = (DateTime)reader["CreatedDate"];
+                    string query = @"Select * from Drivers WHERE DriverID = @DriverID";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                PersonID = (int)reader["PersonID"];
+                                CreatedByUserID = (int)reader["CreatedByUserID"];
+                                CreatedDate = (DateTime)reader["CreatedDate"];
+                            }
+                        }
+                    }
                 }
 
-                reader.Close();
             }
             catch(Exception e)
             {
-                return false;
+                throw e;
             }
-            finally
-            {
-                connection.Close();
-            }
-
+            
             return IsFound;
         }
         public static bool GetDriverByPersonID(int PersonID,ref int DriverID, ref int CreatedByUserID, ref DateTime CreatedDate)
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"Select * from Drivers WHERE PersonID = @PersonID";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@PersonID", PersonID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    connection.Open();
 
-                    DriverID = (int)reader["DriverID"];
-                    CreatedByUserID = (int)reader["CreatedByUserID"];
-                    CreatedDate = (DateTime)reader["CreatedDate"];
+                    string query = @"Select * from Drivers WHERE PersonID = @PersonID";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@PersonID", PersonID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                DriverID = (int)reader["DriverID"];
+                                CreatedByUserID = (int)reader["CreatedByUserID"];
+                                CreatedDate = (DateTime)reader["CreatedDate"];
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return IsFound;

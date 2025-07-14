@@ -10,30 +10,27 @@ namespace DVLD_DataAccess
         {
             DataTable dtLicenseClasses = new DataTable();
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "select * from LicenseClasses;";
-
-            SqlCommand command = new SqlCommand(query,connection);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    string query = "select * from LicenseClasses;";
 
-                SqlDataReader reader = command.ExecuteReader();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        connection.Open();
 
-                if (reader.HasRows)
-                    dtLicenseClasses.Load(reader);
-
-                reader.Close();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                dtLicenseClasses.Load(reader);
+                        }
+                    }
+                }
             }
             catch(Exception e)
             {
-                return null;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return dtLicenseClasses;
@@ -43,40 +40,39 @@ namespace DVLD_DataAccess
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"select * from LicenseClasses Where LicenseClassID = @LicenseClassID ;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
-
             try
             {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    string query = @"select * from LicenseClasses Where LicenseClassID = @LicenseClassID ;";
 
-                    ClassName = (string)reader["ClassName"];
-                    ClassDescription = (string)reader["ClassDescription"];
-                    MinimumAllowedAge = (byte)reader["MinimumAllowedAge"];
-                    DefaultValidityLength = (byte)reader["DefaultValidityLength"];
-                    ClassFees = (decimal)reader["ClassFees"];
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
+
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                ClassName = (string)reader["ClassName"];
+                                ClassDescription = (string)reader["ClassDescription"];
+                                MinimumAllowedAge = (byte)reader["MinimumAllowedAge"];
+                                DefaultValidityLength = (byte)reader["DefaultValidityLength"];
+                                ClassFees = (decimal)reader["ClassFees"];
+                            }
+                            else
+                                IsFound = false;
+                        }
+                    }
                 }
-                else
-                    IsFound = false;
-
-                reader.Close();
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return IsFound;
@@ -86,42 +82,41 @@ namespace DVLD_DataAccess
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"select * from LicenseClasses Where ClassName = @ClassName ;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            command.Parameters.AddWithValue("@ClassName", ClassName);
-
             try
             {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    string query = @"select * from LicenseClasses Where ClassName = @ClassName ;";
 
-                    LicenseClassID = (int)reader["LicenseClassID"];
-                    ClassDescription = (string)reader["ClassDescription"];
-                    MinimumAllowedAge = (byte)reader["MinimumAllowedAge"];
-                    DefaultValidityLength = (byte)reader["DefaultValidityLength"];
-                    ClassFees = (decimal)reader["ClassFees"];
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ClassName", ClassName);
+
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                LicenseClassID = (int)reader["LicenseClassID"];
+                                ClassDescription = (string)reader["ClassDescription"];
+                                MinimumAllowedAge = (byte)reader["MinimumAllowedAge"];
+                                DefaultValidityLength = (byte)reader["DefaultValidityLength"];
+                                ClassFees = (decimal)reader["ClassFees"];
+                            }
+                            else
+                                IsFound = false;
+                        }
+                    }
                 }
-                else
-                    IsFound = false;
-
-                reader.Close();
             }
             catch (Exception e)
             {
-                return false;
+                throw e;
             }
-            finally
-            {
-                connection.Close();
-            }
-
+  
             return IsFound;
         }
     }

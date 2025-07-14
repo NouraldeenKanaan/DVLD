@@ -13,44 +13,44 @@ namespace DVLD_DataAccess
         {
             DataTable dtInternationalLicenses = new DataTable();
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"SELECT InternationalLicenseID, ApplicationID, DriverID, IssuedUsingLocalLicenseID, IssueDate, ExpirationDate, IsActive
-                             FROM InternationalLicenses;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    connection.Open();
 
-                SqlDataReader reader = command.ExecuteReader();
+                    string query = @"SELECT InternationalLicenseID, ApplicationID, DriverID, IssuedUsingLocalLicenseID, IssueDate, ExpirationDate, IsActive
+                             FROM InternationalLicenses;";
 
-                if (reader.HasRows)
-                    dtInternationalLicenses.Load(reader);
-
-                reader.Close();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                dtInternationalLicenses.Load(reader);
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
-                return null;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return dtInternationalLicenses;
-
         }
         public static int NewInternationalLicnse(int ApplicationID,int DriverID,int IssuedUsingLocalLicenseID,DateTime IssueDate,
             DateTime ExpirationDate,bool IsActive,int CreatedByUserID)
         {
             int NewInternationaLicenseID = -1;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    connection.Open();
 
-            string query = @"INSERT INTO [dbo].[InternationalLicenses]
+                    string query = @"INSERT INTO [dbo].[InternationalLicenses]
            ([ApplicationID]
            ,[DriverID]
            ,[IssuedUsingLocalLicenseID]
@@ -62,33 +62,29 @@ namespace DVLD_DataAccess
            (@ApplicationID,@DriverID,@IssuedUsingLocalLicenseID,@IssueDate,@ExpirationDate,@IsActive,@CreatedByUserID);
 		   select SCOPE_IDENTITY();";
 
-            SqlCommand command = new SqlCommand(query, connection);
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
 
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
-            command.Parameters.AddWithValue("@IssuedUsingLocalLicenseID", IssuedUsingLocalLicenseID);
-            command.Parameters.AddWithValue("@IssueDate", IssueDate);
-            command.Parameters.AddWithValue("@ExpirationDate", ExpirationDate);
-            command.Parameters.AddWithValue("@IsActive", IsActive);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+                        command.Parameters.AddWithValue("@IssuedUsingLocalLicenseID", IssuedUsingLocalLicenseID);
+                        command.Parameters.AddWithValue("@IssueDate", IssueDate);
+                        command.Parameters.AddWithValue("@ExpirationDate", ExpirationDate);
+                        command.Parameters.AddWithValue("@IsActive", IsActive);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
 
+                        object result = command.ExecuteScalar();
 
-            try
-            {
-                connection.Open();
-
-                object result = command.ExecuteScalar();
-
-                if (result != null && int.TryParse(result.ToString(), out int InsertedID))
-                {
-                    NewInternationaLicenseID = InsertedID;
+                        if (result != null && int.TryParse(result.ToString(), out int InsertedID))
+                        {
+                            NewInternationaLicenseID = InsertedID;
+                        }
+                    }
                 }
-
-                connection.Close();
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return -1;
+                throw e;
             }
 
             return NewInternationaLicenseID;
@@ -98,42 +94,40 @@ namespace DVLD_DataAccess
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "Select * from InternationalLicenses WHERE InternationalLicenseID = @InternationalLicenseID";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@InternationalLicenseID", InternationalLicenseID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    connection.Open();
 
-                    ApplicationID = (int)reader["ApplicationID"];
-                    DriverID = (int)reader["DriverID"];
-                    IssuedUsingLocalLicenseID = (int)reader["IssuedUsingLocalLicenseID"];
-                    IssueDate = (DateTime)reader["IssueDate"];
-                    ExpirationDate = (DateTime)reader["ExpirationDate"];
-                    IsActive = (bool)reader["IsActive"];
-                    CreatedByUserID = (int)reader["CreatedByUserID"];
+                    string query = "Select * from InternationalLicenses WHERE InternationalLicenseID = @InternationalLicenseID";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@InternationalLicenseID", InternationalLicenseID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                ApplicationID = (int)reader["ApplicationID"];
+                                DriverID = (int)reader["DriverID"];
+                                IssuedUsingLocalLicenseID = (int)reader["IssuedUsingLocalLicenseID"];
+                                IssueDate = (DateTime)reader["IssueDate"];
+                                ExpirationDate = (DateTime)reader["ExpirationDate"];
+                                IsActive = (bool)reader["IsActive"];
+                                CreatedByUserID = (int)reader["CreatedByUserID"];
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
-            }
+                throw e;
+            }  
 
             return IsFound;
         }
@@ -142,77 +136,74 @@ namespace DVLD_DataAccess
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "Select * from InternationalLicenses WHERE DriverID = @DriverID";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    connection.Open();
 
-                    InternationalLicenseID = (int)reader["InternationalLicenseID"];
-                    ApplicationID = (int)reader["ApplicationID"];
-                    IssuedUsingLocalLicenseID = (int)reader["IssuedUsingLocalLicenseID"];
-                    IssueDate = (DateTime)reader["IssueDate"];
-                    ExpirationDate = (DateTime)reader["ExpirationDate"];
-                    IsActive = (bool)reader["IsActive"];
-                    CreatedByUserID = (int)reader["CreatedByUserID"];
+                    string query = "Select * from InternationalLicenses WHERE DriverID = @DriverID";
+
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                InternationalLicenseID = (int)reader["InternationalLicenseID"];
+                                ApplicationID = (int)reader["ApplicationID"];
+                                IssuedUsingLocalLicenseID = (int)reader["IssuedUsingLocalLicenseID"];
+                                IssueDate = (DateTime)reader["IssueDate"];
+                                ExpirationDate = (DateTime)reader["ExpirationDate"];
+                                IsActive = (bool)reader["IsActive"];
+                                CreatedByUserID = (int)reader["CreatedByUserID"];
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return IsFound;
         }
         public static DataTable InternationalLicenseByDriverID(int DriverID)
         {
-            DataTable dt = new DataTable();
-
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"select InternationalLicenseID,ApplicationID,
-                        IssuedUsingLocalLicenseID , IssueDate,ExpirationDate,IsActive  from InternationalLicenses where DriverID = @DriverID";
-
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
+            DataTable dtInternationalLicense = new DataTable();
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    connection.Open();
 
-                SqlDataReader reader = command.ExecuteReader();
+                    string query = @"select InternationalLicenseID,ApplicationID,
+                        IssuedUsingLocalLicenseID , IssueDate,ExpirationDate,IsActive  from InternationalLicenses where DriverID = @DriverID";
 
-                if (reader.HasRows)
-                    dt.Load(reader);
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
 
-                reader.Close();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                dtInternationalLicense.Load(reader);
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
-                return null;
+                throw e;
             }
-            finally
-            {
-                connection.Close();
-            }
-            return dt;
+           
+            return dtInternationalLicense;
         }
     }
 }

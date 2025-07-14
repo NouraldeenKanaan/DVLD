@@ -7,7 +7,7 @@ namespace DVLD_Business
 {
     public static class clsGlobal
     {
-        private static string FilePath = "E:\\UsersInfo.txt";
+        private static string FilePath = "E:\\Git\\DVLD\\Login\\UsersInfo.txt";
 
         public static clsUser CurrentUser;
 

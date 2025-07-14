@@ -10,108 +10,99 @@ namespace DVLD_DataAccess
         {
             DataTable dtTestTypes = new DataTable();
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "SELECT * FROM TestTypes;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    string query = "SELECT * FROM TestTypes;";
 
-                SqlDataReader reader = command.ExecuteReader();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        connection.Open();
 
-                if (reader.HasRows)
-                    dtTestTypes.Load(reader);
-
-                reader.Close();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                dtTestTypes.Load(reader);
+                        }
+                    }
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return null;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return dtTestTypes;
         }
-        public static bool GetTestTypeInfoByID(int TestTypeID,ref string TestTypeTitle,ref string TestTypeDescription,ref decimal TestTypeFees)
+        public static bool GetTestTypeInfoByID(int TestTypeID, ref string TestTypeTitle, ref string TestTypeDescription, ref decimal TestTypeFees)
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "select * from TestTypes where TestTypeID = @ID;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            command.Parameters.AddWithValue("@ID", TestTypeID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    string query = "select * from TestTypes where TestTypeID = @ID;";
 
-                    TestTypeTitle = (string)reader["TestTypeTitle"];
-                    TestTypeDescription = (string)reader["TestTypeDescription"];
-                    TestTypeFees = (decimal)reader["TestTypeFees"];
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ID", TestTypeID);
+
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                TestTypeTitle = (string)reader["TestTypeTitle"];
+                                TestTypeDescription = (string)reader["TestTypeDescription"];
+                                TestTypeFees = (decimal)reader["TestTypeFees"];
+                            }
+                            else
+                                IsFound = false;
+                        }
+                    }
                 }
-                else
-                    IsFound = false;
-
-                reader.Close();
-
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return IsFound;
         }
-        public static bool UpdateTestType(int TestTypeID, string TestTypeTitle,string TestTypeDescription, decimal TestTypeFees)
+        public static bool UpdateTestType(int TestTypeID, string TestTypeTitle, string TestTypeDescription, decimal TestTypeFees)
         {
             int RowsAffected = 0;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"UPDATE [dbo].[TestTypes]
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    string query = @"UPDATE [dbo].[TestTypes]
                                                  SET [TestTypeTitle] = @TestTypeTitle
                                                     ,[TestTypeFees] = @TestTypeFees
                                                     ,[TestTypeDescription] = @TestTypeDescription
                                                WHERE TestTypeID = @TestTypeID;";
 
-            SqlCommand command = new SqlCommand(query, connection);
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
+                        command.Parameters.AddWithValue("@TestTypeTitle", TestTypeTitle);
+                        command.Parameters.AddWithValue("@TestTypeDescription", TestTypeDescription);
+                        command.Parameters.AddWithValue("@TestTypeFees", TestTypeFees);
 
-            command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
-            command.Parameters.AddWithValue("@TestTypeTitle", TestTypeTitle);
-            command.Parameters.AddWithValue("@TestTypeDescription", TestTypeDescription);
-            command.Parameters.AddWithValue("@TestTypeFees", TestTypeFees);
-
-            try
-            {
-                connection.Open();
-                RowsAffected = command.ExecuteNonQuery();
+                        connection.Open();
+                        RowsAffected = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return (RowsAffected > 0);

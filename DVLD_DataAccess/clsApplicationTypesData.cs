@@ -10,30 +10,27 @@ namespace DVLD_DataAccess
         {
             DataTable dtApplicationTypes = new DataTable();
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "select * from ApplicationTypes;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    connection.Open();
 
-                SqlDataReader reader = command.ExecuteReader();
+                    string query = "select * from ApplicationTypes;";
 
-                if (reader.HasRows)
-                    dtApplicationTypes.Load(reader);
-
-                reader.Close();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                dtApplicationTypes.Load(reader);
+                        }
+                    }
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return null;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return dtApplicationTypes;
@@ -42,40 +39,36 @@ namespace DVLD_DataAccess
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = "select * from ApplicationTypes where ApplicationTypeID = @ID;";
-
-            SqlCommand command = new SqlCommand(query, connection);
-
-            command.Parameters.AddWithValue("@ID", ApplicationTypeID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
                 {
-                    IsFound = true;
+                    connection.Open();
 
-                    ApplicationTypeName = (string)reader["ApplicationTypeName"];
-                    ApplicationTypeFees =  (decimal)reader["ApplicationTypeFees"];
-                }
-                else
-                    IsFound = false;
+                    string query = "select * from ApplicationTypes where ApplicationTypeID = @ID;";
 
-                reader.Close();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ID", ApplicationTypeID);
 
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                ApplicationTypeName = (string)reader["ApplicationTypeName"];
+                                ApplicationTypeFees = (decimal)reader["ApplicationTypeFees"];
+                            }
+                            else
+                                IsFound = false;
+                        }
+                    }
+                }     
             }
-            catch (Exception ex)
+            catch(Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return IsFound;
@@ -83,33 +76,31 @@ namespace DVLD_DataAccess
         public static bool UpdateApplicationType(int ApplicationTypeID,string ApplicationTypeName,decimal ApplicationTypeFees)
         {
             int RowsAffected = 0;
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+                {
+                    connection.Open();
 
-            SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString);
-
-            string query = @"UPDATE [dbo].[ApplicationTypes]
+                    string query = @"UPDATE [dbo].[ApplicationTypes]
                                                          SET
                                                          [ApplicationTypeName] = @ApplicationTypeName,
                                                          [ApplicationTypeFees] = @ApplicationTypeFees
                                                    WHERE ApplicationTypeID = @ApplicationTypeID;";
 
-            SqlCommand command = new SqlCommand(query, connection);
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationTypeID", ApplicationTypeID);
+                        command.Parameters.AddWithValue("@ApplicationTypeName", ApplicationTypeName);
+                        command.Parameters.AddWithValue("@ApplicationTypeFees", ApplicationTypeFees);
 
-            command.Parameters.AddWithValue("@ApplicationTypeID", ApplicationTypeID);
-            command.Parameters.AddWithValue("@ApplicationTypeName", ApplicationTypeName);
-            command.Parameters.AddWithValue("@ApplicationTypeFees", ApplicationTypeFees);
-
-            try
-            {
-                connection.Open();
-                RowsAffected = command.ExecuteNonQuery();
+                        RowsAffected = command.ExecuteNonQuery();
+                    }
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                return false;
-            }
-            finally
-            {
-                connection.Close();
+                throw e;
             }
 
             return (RowsAffected > 0);
